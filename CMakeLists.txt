@@ -3,3 +3,4 @@ project(cpp-demo)
 
 add_subdirectory(test-false-sharing)
 add_subdirectory(feed-merger)
+add_subdirectory(market-data-chunk)
