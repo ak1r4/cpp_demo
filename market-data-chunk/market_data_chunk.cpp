@@ -1,3 +1,4 @@
+#include <benchmark/benchmark.h>
 #include <vector>
 #include <ostream>
 #include <iostream>
@@ -11,7 +12,7 @@ using timestamp_t = uint64_t;
 using price_t = uint64_t;
 using index_t = uint64_t;
 using price_point_t = std::pair<timestamp_t, price_t>;
-using chunk_indexes = std::pair<index_t, index_t>;
+using chunk_indexes_t = std::pair<index_t, index_t>;
 using max_min_t = std::pair<price_t, price_t>;
 
 constexpr timestamp_t time_range_start = 1;
@@ -61,6 +62,7 @@ std::vector<price_point_t> generate_price_point_vec() {
                   return pp0.first < pp1.first;
               });
 
+    //std::cout << pp_vec << "\n";
     return pp_vec;
 }
 
@@ -73,15 +75,21 @@ class MaxMinAgg {
         : start_time_(start_time),
           end_time_(end_time),
           n_chunks_(n_chunks) {
+        size_t chunk_size = (end_time - start_time) / n_chunks;
+        index_t start = start_time;
+        index_t end = start_time + chunk_size;
         for (size_t i = 0; i < n_chunks; i++) {
             max_min_vec_.push_back(max_min_t {price_range_start, price_range_end});
+            chunk_indexes_vec_.push_back(chunk_indexes_t {start, end});
+            start = end;
+            end = start + chunk_size;
         }
     }
 
     void on_price_point(const price_point_t& pp) {
         size_t chunk_idx = 0;
         for (; chunk_idx < n_chunks_; chunk_idx++) {
-            if (pp.first < max_min_vec_[chunk_idx].first) {
+            if (pp.first < chunk_indexes_vec_[chunk_idx].first) {
                 break;
             }
         }
@@ -104,23 +112,29 @@ class MaxMinAgg {
     const size_t n_chunks_;
 
     std::vector<max_min_t> max_min_vec_ {};
+    std::vector<chunk_indexes_t> chunk_indexes_vec_ {};
 };
 
-int main() {
+
+void bench(benchmark::State& state) {
     auto pp_vec = generate_price_point_vec();
     MaxMinAgg max_min_agg {time_range_start, time_range_end, n_chunks};
 
-    RECORD(t0);
-    for (const auto& pp : pp_vec) {
-        max_min_agg.on_price_point(pp);
+    //RECORD(t0);
+    for (auto _ : state) {
+        for (const auto& pp : pp_vec) {
+            max_min_agg.on_price_point(pp);
+        }
     }
-    RECORD(t1);
+    //RECORD(t1);
 
-    std::cout << "Agg time: " << DELTA_NANO(t1, t0) << "ns\n";
+    //std::cout << "Agg time: " << DELTA_NANO(t1, t0) << "ns\n";
 
     auto result = max_min_agg.result();
 
-    std::cout << result << "\n";
-
-    return 0;
+    //std::cout << result << "\n";
 }
+
+BENCHMARK(bench);
+
+BENCHMARK_MAIN();
