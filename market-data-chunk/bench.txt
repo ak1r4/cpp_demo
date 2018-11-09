@@ -1,0 +1,20 @@
+ * ./market-data-chunk/market-data-chunk --benchmark_repetitions=5                                       
+2018-11-09 07:11:50                                 
+Running ./market-data-chunk/market-data-chunk       
+Run on (8 X 3800 MHz CPU s)                         
+CPU Caches:                                         
+  L1 Data 32K (x4)                                  
+  L1 Instruction 32K (x4)                           
+  L2 Unified 256K (x4)                              
+  L3 Unified 6144K (x1)                             
+---------------------------------------------------------                                                
+Benchmark                  Time           CPU Iterations                                                 
+---------------------------------------------------------                                                
+bench                 160076 ns     160076 ns       4287                                                 
+bench                 161733 ns     161733 ns       4287                                                 
+bench                 161509 ns     161508 ns       4287                                                 
+bench                 158999 ns     158992 ns       4287                                                 
+bench                 161471 ns     161471 ns       4287                                                 
+bench_mean            160758 ns     160756 ns       4287                                                 
+bench_median          161471 ns     161471 ns       4287                                                 
+bench_stddev            1181 ns       1184 ns       4287                                                 
